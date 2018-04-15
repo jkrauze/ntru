@@ -41,7 +41,7 @@ class NtruCipher:
                 log.debug(ex)
                 tries -= 1
         if self.h_poly is None:
-            raise Exception("Couldn't generate invertable f")
+            raise Exception("Couldn't generate invertible f")
 
     def generate_public_key(self, f_poly, g_poly):
         self.f_poly = f_poly
