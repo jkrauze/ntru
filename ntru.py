@@ -50,7 +50,7 @@ def encrypt(pub_key_file, input_arr):
         raise Exception("Input is too large for current N")
     ntru.h_poly = Poly(pub_key['h'].astype(np.int)[::-1], x).set_domain(ZZ)
     return (ntru.encrypt(Poly(input_arr[::-1], x).set_domain(ZZ),
-                         Poly(np.random.randint(-1, 1, size=ntru.N), x).set_domain(ZZ)).all_coeffs()[::-1])
+                         Poly(np.random.randint(-1, 2, size=ntru.N), x).set_domain(ZZ)).all_coeffs()[::-1])
 
 
 def decrypt(priv_key_file, input_arr):
