@@ -27,12 +27,12 @@ class NtruCipher:
         log.info("NTRU(N={},p={},q={}) initiated".format(N, p, q))
 
     def generate_random_keys(self):
-        g_poly = Poly(np.random.randint(-1, 1, size=self.N), x).set_domain(ZZ)
+        g_poly = Poly(np.random.randint(-1, 2, size=self.N), x).set_domain(ZZ)
         log.info("g: {}".format(g_poly))
 
         tries = 10
         while tries > 0 and (self.h_poly is None):
-            f_poly = Poly(np.random.randint(-1, 1, size=self.N), x).set_domain(ZZ)
+            f_poly = Poly(np.random.randint(-1, 2, size=self.N), x).set_domain(ZZ)
             log.info("f: {}".format(f_poly))
             try:
                 self.generate_public_key(f_poly, g_poly)
