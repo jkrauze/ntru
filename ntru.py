@@ -10,12 +10,14 @@ Usage:
   ntru.py --version
 
 Options:
-  -p, --poly     Interpret input (enc) or output (dec)
-                   as polynomial represented by integer array.
-  -h, --help     Show this screen.
-  --version      Show version.
-  -d, --debug    Debug mode.
-  -v, --verbose  Verbose mode.
+  -i, --poly-input   Interpret input as polynomial
+                       represented by integer array.
+  -o, --poly-output  Interpret output as polynomial
+                       represented by integer array.
+  -h, --help         Show this screen.
+  --version          Show version.
+  -d, --debug        Debug mode.
+  -v, --verbose      Verbose mode.
 
 """
 from docopt import docopt
@@ -25,6 +27,7 @@ from sympy import ZZ, Poly
 import numpy as np
 import sys
 import logging
+import math
 
 log = logging.getLogger("ntru")
 
@@ -43,22 +46,32 @@ def generate(N, p, q, priv_key_file, pub_key_file):
     log.info("Private key saved to {} file".format(pub_key_file))
 
 
-def encrypt(pub_key_file, input_arr):
+def encrypt(pub_key_file, input_arr, bin_output=False):
     pub_key = np.load(pub_key_file)
     ntru = NtruCipher(int(pub_key['N']), int(pub_key['p']), int(pub_key['q']))
-    if (ntru.N < len(input_arr)):
+    if ntru.N < len(input_arr):
         raise Exception("Input is too large for current N")
     ntru.h_poly = Poly(pub_key['h'].astype(np.int)[::-1], x).set_domain(ZZ)
-    return (ntru.encrypt(Poly(input_arr[::-1], x).set_domain(ZZ),
-                         Poly(np.random.randint(-1, 2, size=ntru.N), x).set_domain(ZZ)).all_coeffs()[::-1])
+    output = (ntru.encrypt(Poly(input_arr[::-1], x).set_domain(ZZ),
+                           Poly(np.random.randint(-1, 2, size=ntru.N), x).set_domain(ZZ)).all_coeffs()[::-1])
+    if bin_output:
+        k = int(math.log2(pub_key['q']))
+        output = [[int(c) for c in np.binary_repr(n, width=k)] for n in output]
+    return np.array(output).flatten()
 
 
-def decrypt(priv_key_file, input_arr):
-    pub_key = np.load(priv_key_file)
-    ntru = NtruCipher(int(pub_key['N']), int(pub_key['p']), int(pub_key['q']))
-    ntru.f_poly = Poly(pub_key['f'].astype(np.int)[::-1], x).set_domain(ZZ)
-    ntru.f_p_poly = Poly(pub_key['f_p'].astype(np.int)[::-1], x).set_domain(ZZ)
-    return (ntru.decrypt(Poly(input_arr[::-1], x).set_domain(ZZ)).all_coeffs()[::-1])
+def decrypt(priv_key_file, input_arr, bin_input=False):
+    priv_key = np.load(priv_key_file)
+    input = input_arr
+    if bin_input:
+        k = int(math.log2(int(priv_key['q'])))
+        input = [int("".join(n.astype(str)), 2) for n in np.array(input).reshape((-1, k))]
+    input = input[::-1]
+
+    ntru = NtruCipher(int(priv_key['N']), int(priv_key['p']), int(priv_key['q']))
+    ntru.f_poly = Poly(priv_key['f'].astype(np.int)[::-1], x).set_domain(ZZ)
+    ntru.f_p_poly = Poly(priv_key['f_p'].astype(np.int)[::-1], x).set_domain(ZZ)
+    return ntru.decrypt(Poly(input, x).set_domain(ZZ)).all_coeffs()[::-1]
 
 
 if __name__ == '__main__':
@@ -75,30 +88,34 @@ if __name__ == '__main__':
     root.addHandler(ch)
 
     log.debug(args)
-    polynomial = bool(args['--poly'])
+    poly_input = bool(args['--poly-input'])
+    poly_output = bool(args['--poly-output'])
+    input_arr, output = None, None
     if not args['gen']:
         if args['FILE'] is None or args['FILE'] == '-':
-            input = sys.stdin.read()
+            input = sys.stdin.read() if poly_input else sys.stdin.buffer.read()
         else:
             with open(args['FILE'], 'rb') as file:
                 input = file.read()
         log.info("---INPUT---")
         log.info(input)
         log.info("-----------")
+        if poly_input:
+            input_arr = eval(input)
+        else:
+            input_arr = np.unpackbits(np.frombuffer(input, dtype=np.uint8))
 
     if args['gen']:
         generate(int(args['N']), int(args['P']), int(args['Q']), args['PRIV_KEY_FILE'], args['PUB_KEY_FILE'])
     elif args['enc']:
-        if polynomial:
-            input_arr = eval(input)
-        else:
-            input_arr = np.unpackbits(np.frombuffer(input, dtype=np.uint8))
         log.info("POLYNOMIAL LENGTH: {}".format(len(input_arr)))
         log.debug("BINARY: {}".format(input_arr))
-        print(str(encrypt(args['PUB_KEY_FILE'], input_arr)))
+        output = encrypt(args['PUB_KEY_FILE'], input_arr, bin_output=not poly_output)
     elif args['dec']:
-        output = decrypt(args['PRIV_KEY_FILE'], eval(input))
-        if polynomial:
-            print(str(output))
+        output = decrypt(args['PRIV_KEY_FILE'], input_arr, bin_input=not poly_input)
+
+    if not args['gen']:
+        if poly_output:
+            print(list(output))
         else:
             sys.stdout.buffer.write(np.packbits(np.array(output).astype(np.int)).tobytes())
