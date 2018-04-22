@@ -53,7 +53,8 @@ def encrypt(pub_key_file, input_arr, bin_output=False):
         raise Exception("Input is too large for current N")
     ntru.h_poly = Poly(pub_key['h'].astype(np.int)[::-1], x).set_domain(ZZ)
     output = (ntru.encrypt(Poly(input_arr[::-1], x).set_domain(ZZ),
-                           Poly(np.random.randint(-1, 2, size=ntru.N), x).set_domain(ZZ)).all_coeffs()[::-1])
+                           Poly(np.random.choice([-1, 0, 1], size=ntru.N, p=[0.05, 0.9, 0.05]), x).set_domain(
+                               ZZ)).all_coeffs()[::-1])
     if bin_output:
         k = int(math.log2(pub_key['q']))
         output = [[int(c) for c in np.binary_repr(n, width=k)] for n in output]

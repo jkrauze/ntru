@@ -66,7 +66,7 @@ class NtruCipher:
         log.info("r: {}".format(rand_poly))
         log.info("msg: {}".format(msg_poly))
         log.info("h: {}".format(self.h_poly))
-        return (((rand_poly * self.h_poly) % self.R_poly).trunc(self.q) + msg_poly % self.R_poly).trunc(self.q)
+        return (((rand_poly * self.h_poly).trunc(self.q) + msg_poly) % self.R_poly).trunc(self.q)
 
     def decrypt(self, msg_poly):
         log.info("f: {}".format(self.f_poly))
