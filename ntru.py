@@ -152,6 +152,6 @@ if __name__ == '__main__':
 
     if not args['gen']:
         if poly_output:
-            print(list(output))
+            print(list(output.astype(np.int)))
         else:
             sys.stdout.buffer.write(np.packbits(np.array(output).astype(np.int)).tobytes())
