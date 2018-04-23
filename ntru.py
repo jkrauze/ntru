@@ -105,6 +105,7 @@ if __name__ == '__main__':
             input_arr = eval(input)
         else:
             input_arr = np.unpackbits(np.frombuffer(input, dtype=np.uint8))
+            input_arr = np.trim_zeros(input_arr, 'b')
 
     if args['gen']:
         generate(int(args['N']), int(args['P']), int(args['Q']), args['PRIV_KEY_FILE'], args['PUB_KEY_FILE'])
