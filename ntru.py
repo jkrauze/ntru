@@ -68,6 +68,7 @@ def decrypt(priv_key_file, input_arr, bin_input=False):
         k = int(math.log2(int(priv_key['q'])))
         input = [int("".join(n.astype(str)), 2) for n in np.array(input).reshape((-1, k))]
     input = input[::-1]
+    log.info("POLYNOMIAL DEGREE: {}".format(max(0, len(input) - 1)))
 
     ntru = NtruCipher(int(priv_key['N']), int(priv_key['p']), int(priv_key['q']))
     ntru.f_poly = Poly(priv_key['f'].astype(np.int)[::-1], x).set_domain(ZZ)
@@ -105,13 +106,13 @@ if __name__ == '__main__':
             input_arr = eval(input)
         else:
             input_arr = np.unpackbits(np.frombuffer(input, dtype=np.uint8))
-            input_arr = np.trim_zeros(input_arr, 'b')
+        input_arr = np.trim_zeros(input_arr, 'b')
+        log.info("POLYNOMIAL DEGREE: {}".format(max(0, len(input_arr) - 1)))
+        log.debug("BINARY: {}".format(input_arr))
 
     if args['gen']:
         generate(int(args['N']), int(args['P']), int(args['Q']), args['PRIV_KEY_FILE'], args['PUB_KEY_FILE'])
     elif args['enc']:
-        log.info("POLYNOMIAL LENGTH: {}".format(len(input_arr)))
-        log.debug("BINARY: {}".format(input_arr))
         output = encrypt(args['PUB_KEY_FILE'], input_arr, bin_output=not poly_output)
     elif args['dec']:
         output = decrypt(args['PRIV_KEY_FILE'], input_arr, bin_input=not poly_input)
