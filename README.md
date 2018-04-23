@@ -14,9 +14,10 @@ sudo dnf install python3
 ```
 
 ### Install dependencies
-You should have [SymPy](http://www.sympy.org) and [docopt](http://www.docopt.org/) package installed.
+You should have [SymPy](http://www.sympy.org), [NumPy](http://www.numpy.org/) and [docopt](http://www.docopt.org/) package installed.
 ```
 pip3 install --user sympy
+pip3 install --user numpy
 pip3 install --user docopt
 ```
 
