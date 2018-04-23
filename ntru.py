@@ -64,7 +64,9 @@ def encrypt(pub_key_file, input_arr, bin_output=False, block=False):
         input_arr = padding_encode(input_arr, ntru.N)
         input_arr = input_arr.reshape((-1, ntru.N))
         output = np.array([])
-        for b in input_arr:
+        block_count = input_arr.shape[0]
+        for i,b in enumerate(input_arr,start=1):
+            log.info("Processing block {} out of {}".format(i, block_count))
             next_output = (ntru.encrypt(Poly(b[::-1], x).set_domain(ZZ), random_poly(ntru)).all_coeffs()[::-1])
             if len(next_output) < ntru.N:
                 next_output = np.pad(next_output, (0, ntru.N - len(next_output)), 'constant')
@@ -97,7 +99,9 @@ def decrypt(priv_key_file, input_arr, bin_input=False, block=False):
 
     input_arr = input_arr.reshape((-1, ntru.N))
     output = np.array([])
-    for b in input_arr:
+    block_count = input_arr.shape[0]
+    for i, b in enumerate(input_arr, start=1):
+        log.info("Processing block {} out of {}".format(i, block_count))
         next_output = ntru.decrypt(Poly(b[::-1], x).set_domain(ZZ)).all_coeffs()[::-1]
         if len(next_output) < ntru.N:
             next_output = np.pad(next_output, (0, ntru.N - len(next_output)), 'constant')
