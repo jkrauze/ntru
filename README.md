@@ -3,7 +3,7 @@
 Polynomial operations are implemented using [SymPy](http://www.sympy.org) library.
 It was made as a homework project for "Error-Correcting Codes and Cryptography" workshops on [Faculty of Mathematics and Information Science of Warsaw University of Technology](http://www.mini.pw.edu.pl).
 
-**This package was made as an excercise. It shouldn't be use anywhere to secure data.**
+**This package was made as an excercise. It shouldn't be used anywhere to secure data.**
 
 ## How to run?
 
