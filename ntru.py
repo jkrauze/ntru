@@ -89,7 +89,7 @@ def decrypt(priv_key_file, input_arr, bin_input=False, block=False):
         if pad == k:
             pad = 0
         input_arr = np.array([int("".join(n.astype(str)), 2) for n in
-                     np.pad(np.array(input_arr), (0, pad), 'constant').reshape((-1, k))])
+                              np.pad(np.array(input_arr), (0, pad), 'constant').reshape((-1, k))])
     if not block:
         if ntru.N < len(input_arr):
             raise Exception("Input is too large for current N")
