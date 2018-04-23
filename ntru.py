@@ -63,14 +63,15 @@ def encrypt(pub_key_file, input_arr, bin_output=False):
 
 def decrypt(priv_key_file, input_arr, bin_input=False):
     priv_key = np.load(priv_key_file)
+    ntru = NtruCipher(int(priv_key['N']), int(priv_key['p']), int(priv_key['q']))
     input = input_arr
     if bin_input:
-        k = int(math.log2(int(priv_key['q'])))
-        input = [int("".join(n.astype(str)), 2) for n in np.array(input).reshape((-1, k))]
+        k = int(math.log2(ntru.q))
+        pad = len(input_arr) % k
+        input = [int("".join(n.astype(str)), 2) for n in np.pad(np.array(input), (0, pad), 'constant').reshape((-1, k))]
     input = input[::-1]
     log.info("POLYNOMIAL DEGREE: {}".format(max(0, len(input) - 1)))
 
-    ntru = NtruCipher(int(priv_key['N']), int(priv_key['p']), int(priv_key['q']))
     ntru.f_poly = Poly(priv_key['f'].astype(np.int)[::-1], x).set_domain(ZZ)
     ntru.f_p_poly = Poly(priv_key['f_p'].astype(np.int)[::-1], x).set_domain(ZZ)
     return ntru.decrypt(Poly(input, x).set_domain(ZZ)).all_coeffs()[::-1]
