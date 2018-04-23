@@ -23,6 +23,7 @@ Options:
 """
 from docopt import docopt
 from ntru.ntrucipher import NtruCipher
+from ntru.mathutils import random_poly
 from sympy.abc import x
 from sympy import ZZ, Poly
 from padding.padding import *
@@ -35,10 +36,6 @@ log = logging.getLogger("ntru")
 
 debug = False
 verbose = False
-
-
-def random_poly(ntru):
-    return Poly(np.random.choice([-1, 0, 1], size=ntru.N, p=[0.05, 0.9, 0.05]), x).set_domain(ZZ)
 
 
 def generate(N, p, q, priv_key_file, pub_key_file):
@@ -59,15 +56,17 @@ def encrypt(pub_key_file, input_arr, bin_output=False, block=False):
     if not block:
         if ntru.N < len(input_arr):
             raise Exception("Input is too large for current N")
-        output = (ntru.encrypt(Poly(input_arr[::-1], x).set_domain(ZZ), random_poly(ntru)).all_coeffs()[::-1])
+        output = (ntru.encrypt(Poly(input_arr[::-1], x).set_domain(ZZ),
+                               random_poly(ntru.N, int(math.sqrt(ntru.q)))).all_coeffs()[::-1])
     else:
         input_arr = padding_encode(input_arr, ntru.N)
         input_arr = input_arr.reshape((-1, ntru.N))
         output = np.array([])
         block_count = input_arr.shape[0]
-        for i,b in enumerate(input_arr,start=1):
+        for i, b in enumerate(input_arr, start=1):
             log.info("Processing block {} out of {}".format(i, block_count))
-            next_output = (ntru.encrypt(Poly(b[::-1], x).set_domain(ZZ), random_poly(ntru)).all_coeffs()[::-1])
+            next_output = (ntru.encrypt(Poly(b[::-1], x).set_domain(ZZ),
+                                        random_poly(ntru.N, int(math.sqrt(ntru.q)))).all_coeffs()[::-1])
             if len(next_output) < ntru.N:
                 next_output = np.pad(next_output, (0, ntru.N - len(next_output)), 'constant')
             output = np.concatenate((output, next_output))

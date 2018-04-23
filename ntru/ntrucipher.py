@@ -4,6 +4,7 @@ from sympy.abc import x
 from sympy.polys.polyerrors import NotInvertible
 from sympy import ZZ, Poly
 import logging
+from collections import Counter
 
 log = logging.getLogger("ntrucipher")
 
@@ -27,13 +28,16 @@ class NtruCipher:
         log.info("NTRU(N={},p={},q={}) initiated".format(N, p, q))
 
     def generate_random_keys(self):
-        g_poly = Poly(np.random.randint(-1, 2, size=self.N), x).set_domain(ZZ)
+        g_poly = random_poly(self.N, int(math.sqrt(self.q)))
         log.info("g: {}".format(g_poly))
+        log.info("g coeffs: {}".format(Counter(g_poly.coeffs())))
+
 
         tries = 10
         while tries > 0 and (self.h_poly is None):
-            f_poly = Poly(np.random.randint(-1, 2, size=self.N), x).set_domain(ZZ)
+            f_poly = random_poly(self.N, self.N // 3, neg_ones_diff=-1)
             log.info("f: {}".format(f_poly))
+            log.info("f coeffs: {}".format(Counter(f_poly.coeffs())))
             try:
                 self.generate_public_key(f_poly, g_poly)
             except NotInvertible as ex:
@@ -64,6 +68,7 @@ class NtruCipher:
 
     def encrypt(self, msg_poly, rand_poly):
         log.info("r: {}".format(rand_poly))
+        log.info("r coeffs: {}".format(Counter(rand_poly.coeffs())))
         log.info("msg: {}".format(msg_poly))
         log.info("h: {}".format(self.h_poly))
         return (((rand_poly * self.h_poly).trunc(self.q) + msg_poly) % self.R_poly).trunc(self.q)

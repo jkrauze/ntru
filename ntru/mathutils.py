@@ -1,6 +1,9 @@
 import math
 from sympy import GF, invert
 import logging
+import numpy as np
+from sympy.abc import x
+from sympy import ZZ, Poly
 
 log = logging.getLogger("mathutils")
 
@@ -14,6 +17,12 @@ def is_prime(n):
 
 def is_2_power(n):
     return n != 0 and (n & (n - 1) == 0)
+
+
+def random_poly(length, d, neg_ones_diff=0):
+    return Poly(np.random.permutation(
+        np.concatenate((np.zeros(length - 2 * d - neg_ones_diff), np.ones(d), -np.ones(d + neg_ones_diff)))),
+        x).set_domain(ZZ)
 
 
 def invert_poly(f_poly, R_poly, p):
