@@ -5,7 +5,6 @@ Usage:
   ntru.py [options] enc PUB_KEY_FILE [FILE]
   ntru.py [options] dec PRIV_KEY_FILE [FILE]
   ntru.py [options] gen N P Q PRIV_KEY_FILE PUB_KEY_FILE
-  ntru.py [options] sav N P Q F G PRIV_KEY_FILE PUB_KEY_FILE
   ntru.py (-h | --help)
   ntru.py --version
 
