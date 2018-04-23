@@ -65,7 +65,6 @@ def encrypt(pub_key_file, input_arr, bin_output=False, block=False):
         input_arr = input_arr.reshape((-1, ntru.N))
         output = np.array([])
         for b in input_arr:
-            rand_poly = Poly(np.random.choice([-1, 0, 1], size=ntru.N, p=[0.05, 0.9, 0.05]), x).set_domain(ZZ)
             next_output = (ntru.encrypt(Poly(b[::-1], x).set_domain(ZZ), random_poly(ntru)).all_coeffs()[::-1])
             if len(next_output) < ntru.N:
                 next_output = np.pad(next_output, (0, ntru.N - len(next_output)), 'constant')
