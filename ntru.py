@@ -136,7 +136,7 @@ if __name__ == '__main__':
         log.info(input)
         log.info("-----------")
         if poly_input:
-            input_arr = eval(input)
+            input_arr = np.array(eval(input))
         else:
             input_arr = np.unpackbits(np.frombuffer(input, dtype=np.uint8))
         input_arr = np.trim_zeros(input_arr, 'b')
