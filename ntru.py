@@ -50,7 +50,7 @@ def generate(N, p, q, priv_key_file, pub_key_file):
 
 
 def encrypt(pub_key_file, input_arr, bin_output=False, block=False):
-    pub_key = np.load(pub_key_file)
+    pub_key = np.load(pub_key_file, allow_pickle=True)
     ntru = NtruCipher(int(pub_key['N']), int(pub_key['p']), int(pub_key['q']))
     ntru.h_poly = Poly(pub_key['h'].astype(np.int)[::-1], x).set_domain(ZZ)
     if not block:
@@ -78,7 +78,7 @@ def encrypt(pub_key_file, input_arr, bin_output=False, block=False):
 
 
 def decrypt(priv_key_file, input_arr, bin_input=False, block=False):
-    priv_key = np.load(priv_key_file)
+    priv_key = np.load(priv_key_file, allow_pickle=True)
     ntru = NtruCipher(int(priv_key['N']), int(priv_key['p']), int(priv_key['q']))
     ntru.f_poly = Poly(priv_key['f'].astype(np.int)[::-1], x).set_domain(ZZ)
     ntru.f_p_poly = Poly(priv_key['f_p'].astype(np.int)[::-1], x).set_domain(ZZ)
