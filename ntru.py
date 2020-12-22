@@ -46,7 +46,7 @@ def generate(N, p, q, priv_key_file, pub_key_file):
     np.savez_compressed(priv_key_file, N=N, p=p, q=q, f=f, f_p=f_p)
     log.info("Private key saved to {} file".format(priv_key_file))
     np.savez_compressed(pub_key_file, N=N, p=p, q=q, h=h)
-    log.info("Private key saved to {} file".format(pub_key_file))
+    log.info("Public key saved to {} file".format(pub_key_file))
 
 
 def encrypt(pub_key_file, input_arr, bin_output=False, block=False):
